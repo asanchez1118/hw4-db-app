@@ -22,6 +22,7 @@ import javax.persistence.TypedQuery;
 import java.util.logging.Logger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.IntStream;
@@ -181,8 +182,8 @@ private static void lowestPriceLateNight() {
 	   " LEFT OUTER JOIN Hours h on h.RestaurantID = r.RestaurantID" +
 	   		" GROUP BY m.price " + 
 			  "HAVING m.price < 10.00;");
-	  List results = q.getResultList(); 
-	  for(Object:results)
+	  List<Object[]> data = q.getResultList(); 
+	  List<MyObject> result = new List<>(data.size()); 
 		  
 }
 
