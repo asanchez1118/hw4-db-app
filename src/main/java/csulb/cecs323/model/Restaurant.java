@@ -3,9 +3,18 @@ package csulb.cecs323.model;
 import javax.persistence.*;
 
 @Entity
+@Table(name = "restaurants")
+@NamedQueries({
+      @NamedQuery(name= Restaurant.FIND_ALL, query="SELECT r FROM Restaurant r"),
+      @NamedQuery(name= Restaurant.FIND_LOCATION, query="SELECT r FROM Restaurant r WHERE r.RestaurantID = :RestaurantID"),
+      @NamedQuery(name= Restaurant.FIND_BY_NAME, query="SELECT r FROM Restaurant r WHERE r.name = :name")
+})
 public class Restaurant {
 
     @Id @GeneratedValue private int RestaurantID;
+    public static final String FIND_ALL = "Restaurant.findAll"; 
+    public static final String FIND_LOCATION = "Restaurant.findByLocation"; 
+    public static final String FIND_BY_NAME = "Restaurant.findByName"; 
     private String name;
     private String street;
     private String City;
@@ -27,8 +36,16 @@ public class Restaurant {
         ND,OH,OK,OR,PA,RI,SC,SD,TN,TX,UT,VT,VA,WA,WV,WI,WY
 
     }
+    public Restaurant() {}; 
+    
+    public Restaurant(String name, String address, String phone) {
+		// A constructor that is used to load initial data to the database
+    	this.name = name;
+    	this.street =  address; 
+    	this.phone = phone; 
+	}
 
-    public enum Takeout {
+	public enum Takeout {
         YES,
         NO
     }

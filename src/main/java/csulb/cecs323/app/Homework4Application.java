@@ -17,7 +17,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
+
 import java.util.logging.Logger;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.IntStream;
 
 /**
  * A simple application to demonstrate how to persist an object in JPA.
@@ -39,7 +44,6 @@ public class Homework4Application {
       EntityManager manager = factory.createEntityManager();
       Homework4Application hw4application = new Homework4Application(manager);
 
-
       // Any changes to the database need to be done within a transaction.
       // See: https://en.wikibooks.org/wiki/Java_Persistence/Transactions
 
@@ -52,9 +56,74 @@ public class Homework4Application {
 
       tx.commit();
       LOGGER.fine("End of Transaction");
+      
+      hw4application.listRestaurants();
+
+      System.out.println("\nDone!");
 
    }
+   private void loadInitialData() {
 
+	      // Create a TypedQuery<> object to executed a named JPQL query
+	      TypedQuery<Restaurant> checkRestaurant = entityManager.createNamedQuery(Restaurant.FIND_BY_NAME, Restaurant.class);
+
+	      // Bind the parameters of the JPQL query to values
+	      checkRestaurant.setParameter("firstName", INITIAL_RESTAURANTS[0].getName());
+	      
+	      // Execute the query and get the size of the result
+	      int numberOfRestaurants = checkRestaurant.getResultList().size();
+
+	      if (numberOfRestaurants == 0) { // assume other objects also don't exist
+
+	         System.out.println("Assume Database is empty, load it with initial data");
+
+	         IntStream.range(0, INITIAL_RESTAURANTS .length).forEach(i -> {
+	            Restaurant restaurant = INITIAL_RESTAURANTS[i];
+	            restaurant.setBranch(INITIAL_BRANCHES[LOAN_BRANCHES[i]]);
+
+	            // ownership is a bi-directional relationship, so we must establish the relationship on both sides
+	       /**     loan.setOwner(INITIAL_CUSTOMERS[LOAN_OWNERS[i]]);
+	            INITIAL_CUSTOMERS[LOAN_OWNERS[i]].addLoan(loan);**/
+	         });
+
+	         // Note that the Loan objects are not yet persisted in the loop above.
+	         // Loans will be persisted because the Customer object owning it is persisted and
+	         // there's an annotation to persist the cascade action (see annotation of Customer)
+	         // from the Customer to the Loan
+
+	         for (Restaurant restaurant : INITIAL_RESTAURANTS) {
+	            entityManager.persist(restaurant);
+	         }
+
+
+	      }
+	   }
+   /**
+    * Listing restaurant objects already in our database
+    */
+   private void listRestaurants() {
+	      List<Restaurant> allRestaurants = entityManager.createNamedQuery(Restaurant.FIND_ALL, Restaurant.class).getResultList();
+
+	      for (Restaurant restaurant : allRestaurants) {
+	         System.out.println(restaurant);
+	      }
+	   }
+   
+   /**
+    * list of initial entries in the database
+    * */
+   private static final Restaurant[] INITIAL_RESTAURANTS = new Restaurant[]{
+	         new Restaurant("McDonald's","123 Elm Street","555-123-1234"),
+	         new Restaurant("Maria's Italian Kitchen", "1076 W Pico Blvd", "310-441-4589"),
+	         new Restaurant("Ben and Jerry's", "678 Fake Street", "555-567-3426"),
+	         new Restaurant("Black Angus", "6345 Western Avenue" , "323-495-2387")
+	   };
+   private static final User[] INITIAL_USERS = new User[]{
+	         new User("Antonio", "Sanchez", "555-872-1234"),
+	         new User("Meng", "Cha", "310-653-7743"),
+	         new User("Pamela", "Regudo", "555-567-3426"),
+	         new User("John", "Doe", "323-495-2387")
+	   };
    /**
     * Create and persist a Student object to the database.
     */
@@ -68,7 +137,7 @@ public class Homework4Application {
 
       LOGGER.fine("Persisting Student object to DB");
       this.entityManager.persist(graceHopper);
-
+      
       Restaurant mcDonalds = new Restaurant();
       mcDonalds.setName("McDonalds");
       mcDonalds.setStreet("123 Elm Street");

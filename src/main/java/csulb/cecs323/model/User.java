@@ -26,8 +26,37 @@ public class User {
     
     @OneToMany
     private Rating rating;
-    
-     public int getUserID() {
+    /**
+     * Setting up initial users in DB
+     * @param first
+     * @param last
+     * @param phone
+     * @param review
+     * @param check
+     * @param ratings
+     */
+     public User(String first, String last, String phone, int review, int check, int ratings) {
+		this.fName = first;
+		this.lName = last; 
+		this.phone = phone; 
+		this.numOfReviews = review; 
+		this.numOfCheckIns = check;
+		this.numOfRatings = ratings; 
+	}
+
+     /**
+      * If completely brand new to the app/database
+      * @param first
+      * @param last
+      * @param phone
+      */
+	public User(String first, String last, String phone) {
+		this.fName = first;
+		this.lName = last; 
+		this.phone = phone; 	
+	}
+
+	public int getUserID() {
     	 return userID;
      }
     
