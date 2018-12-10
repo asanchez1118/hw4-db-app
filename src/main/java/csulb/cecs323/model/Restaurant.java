@@ -8,6 +8,7 @@ import javax.persistence.*;
       @NamedQuery(name= Restaurant.FIND_ALL, query="SELECT r FROM Restaurant r"),
       @NamedQuery(name= Restaurant.FIND_LOCATION, query="SELECT r FROM Restaurant r WHERE r.RestaurantID = :RestaurantID"),
       @NamedQuery(name= Restaurant.FIND_BY_NAME, query="SELECT r FROM Restaurant r WHERE r.name = :name")
+     
 })
 public class Restaurant {
 
@@ -15,6 +16,7 @@ public class Restaurant {
     public static final String FIND_ALL = "Restaurant.findAll"; 
     public static final String FIND_LOCATION = "Restaurant.findByLocation"; 
     public static final String FIND_BY_NAME = "Restaurant.findByName"; 
+
     private String name;
     private String street;
     private String City;

@@ -28,11 +28,19 @@ public class Menu {
         Eggs,
         Burger,
         Steak,
+        Pasta, 
         Ice_Cream,
         Soda
     }
 
-    public String getItemName() {
+    public Menu(String item, String menu, String type, double p) {
+		this.itemName = item; 
+		this.menuType = MenuType.valueOf(menu);
+		this.itemType = ItemType.valueOf(type);
+		this.price = p; 
+	}
+
+	public String getItemName() {
         return itemName;
     }
 

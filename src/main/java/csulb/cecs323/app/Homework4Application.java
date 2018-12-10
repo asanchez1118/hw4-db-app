@@ -17,25 +17,27 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-
 import java.util.logging.Logger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
 /**
- * A simple application to demonstrate how to persist an object in JPA.
- *
- * This is for demonstration and educational purposes only.
+ * @Author Antonio Sanchez
+ * 
  */
 public class Homework4Application {
-   private EntityManager entityManager;
-
+   private static int choice = 0;
+   private static EntityManager entityManager;
+   private static Scanner in = new Scanner(System.in);
    private static final Logger LOGGER = Logger.getLogger(Homework4Application.class.getName());
 
    public Homework4Application(EntityManager manager) {
-      this.entityManager = manager;
+      Homework4Application.entityManager = manager;
    }
 
    public static void main(String[] args) {
@@ -46,13 +48,51 @@ public class Homework4Application {
 
       // Any changes to the database need to be done within a transaction.
       // See: https://en.wikibooks.org/wiki/Java_Persistence/Transactions
+      
+      do {
+			System.out.println("\nChoose from the following options:");
+			System.out.println();
+			System.out.println("1. Restaurant Options");
+			System.out.println("2. Menu Options");
+			System.out.println("3. Write a Review");
+			System.out.println("4. Check-In");
+			System.out.println("5. Report an Issue");
+			System.out.println("6. Exit");
+		
+			choice = in.nextInt();
+			
+			switch(choice) {
+			case 1:	
+				restaurantSearchMenu();
+				break;
+			case 2:
+				menuSearchMenu();
+				break;
+			case 3:
+				writeReview();
+				break;
+			case 4:
+				//updateCheckIn();
+				break;
+			case 5:
+				reportMenu();
+				break; 
+				
+			case 6:
+				System.out.println("Goodbye!");
+				System.exit(0);
+				break;
+			default:
+				System.out.println("Choice must be a value between 1 and 6.");
+			}
+	}while(choice != 6);
 
       LOGGER.fine("Begin of Transaction");
       EntityTransaction tx = manager.getTransaction();
 
       tx.begin();
 
-      hw4application.createStudentEntity();
+     // hw4application.createStudentEntity();
 
       tx.commit();
       LOGGER.fine("End of Transaction");
@@ -62,13 +102,97 @@ public class Homework4Application {
       System.out.println("\nDone!");
 
    }
-   private void loadInitialData() {
+   private static void reportMenu() {
+	   int subMenuChoice = 0; 
+	   do {
+		   System.out.println("Please select from the following");
+		   System.out.println("1. View the highest priced items");
+		   System.out.println("2. Display reviews");
+		   System.out.println("3. Late Night Deals");
+		   System.out.println("4. Return to main menu");
+		   switch(subMenuChoice) {
+			case 1:	
+				viewByPrice();
+				break;
+			case 2:
+				menuSearchMenu();
+				break;
+			case 3:
+				lowestPriceLateNight();
+				break;
+			case 4:
+				break;
+			default:
+				System.out.println("Choice must be a value between 1 and 4.");
+			}
+	   }while(subMenuChoice !=4);
+	   return;
+	
+	
+}
+
+private static void writeReview() {
+	// TODO Auto-generated method stub
+	
+}
+
+private static void menuSearchMenu() {
+	   int subMenuChoice = 0; 
+	   do {
+		   System.out.println("Please select from the following");
+		   System.out.println("1. View the highest priced items");
+		   System.out.println("2. Display reviews");
+		   System.out.println("3. Late Night Deals");
+		   System.out.println("4. Return to main menu");
+		   switch(subMenuChoice) {
+			case 1:	
+				viewByPrice();
+				break;
+			case 2:
+				menuSearchMenu();
+				break;
+			case 3:
+				lowestPriceLateNight();
+				break;
+			case 4:
+				break;
+			default:
+				System.out.println("Choice must be a value between 1 and 4.");
+			}
+	   }while(subMenuChoice !=4);
+	   return;
+	
+   }
+   
+   
+   private static void viewByPrice() {
+	Query q = entityManager.createQuery("SELECT r.rating AS Rating, r.name AS Restaurant, COUNT(*) AS #_of_Check-Ins"+
+			 							" FROM Restaurant r INNER JOIN Rating" +
+			 							" CheckIn c ON r.RestaurantID = c.RestaurantID" +
+										"WHERE r.rating = 4.0;"); 
+	List results = q.getResultList();
+	
+}
+
+private static void lowestPriceLateNight() {
+	// TODO Auto-generated method stubSELECT m.itemName, ,r.name , h.hoursOpen AS Hours_Open
+	  Query q = entityManager.createQuery("FROM Menu m" +
+	   " LEFT OUTER JOIN Restaurant r ON r.RestaurantID = m.RestaurantID" +
+	   " LEFT OUTER JOIN Hours h on h.RestaurantID = r.RestaurantID" +
+	   		" GROUP BY m.price " + 
+			  "HAVING m.price < 10.00;");
+	  List results = q.getResultList(); 
+	  for(Object:results)
+		  
+}
+
+private void loadInitialData() {
 
 	      // Create a TypedQuery<> object to executed a named JPQL query
 	      TypedQuery<Restaurant> checkRestaurant = entityManager.createNamedQuery(Restaurant.FIND_BY_NAME, Restaurant.class);
 
 	      // Bind the parameters of the JPQL query to values
-	      checkRestaurant.setParameter("firstName", INITIAL_RESTAURANTS[0].getName());
+	      checkRestaurant.setParameter("name", INITIAL_RESTAURANTS[0].getName());
 	      
 	      // Execute the query and get the size of the result
 	      int numberOfRestaurants = checkRestaurant.getResultList().size();
@@ -77,20 +201,10 @@ public class Homework4Application {
 
 	         System.out.println("Assume Database is empty, load it with initial data");
 
-	         IntStream.range(0, INITIAL_RESTAURANTS .length).forEach(i -> {
+	    /*     IntStream.range(0, INITIAL_RESTAURANTS .length).forEach(i -> {
 	            Restaurant restaurant = INITIAL_RESTAURANTS[i];
-	            restaurant.setBranch(INITIAL_BRANCHES[LOAN_BRANCHES[i]]);
-
-	            // ownership is a bi-directional relationship, so we must establish the relationship on both sides
-	       /**     loan.setOwner(INITIAL_CUSTOMERS[LOAN_OWNERS[i]]);
-	            INITIAL_CUSTOMERS[LOAN_OWNERS[i]].addLoan(loan);**/
-	         });
-
-	         // Note that the Loan objects are not yet persisted in the loop above.
-	         // Loans will be persisted because the Customer object owning it is persisted and
-	         // there's an annotation to persist the cascade action (see annotation of Customer)
-	         // from the Customer to the Loan
-
+	        );
+*/
 	         for (Restaurant restaurant : INITIAL_RESTAURANTS) {
 	            entityManager.persist(restaurant);
 	         }
@@ -122,11 +236,72 @@ public class Homework4Application {
 	         new User("Antonio", "Sanchez", "555-872-1234"),
 	         new User("Meng", "Cha", "310-653-7743"),
 	         new User("Pamela", "Regudo", "555-567-3426"),
+	         new User("John", "Doe", "323-495-2387"),
+	         new User("Arthur", "Morgan", "323-499-1899", 5,2,1),
+	         new User("John", "Doe", "323-495-2387",2,5),
+	         new User("John", "Doe", "323-495-2387",1),
+	         new User("John", "Doe", "323-495-2387", 5,2,1),
+	         new User("John", "Doe", "323-495-2387",0,2,0),
+	         new User("John", "Doe", "323-495-2387",0,0,3),
 	         new User("John", "Doe", "323-495-2387")
+	         
 	   };
-   /**
+   
+   private static final Menu[] INITIAL_MENUS = new Menu[] {
+		   new Menu("Eggs Benedict", "Breakfast","Eggs", 5.00),
+		   new Menu("Cheeseburger", "Lunch","Burger", 9.00),
+		   new Menu("T-Bone", "Dinner","Steak", 25.00),
+		   new Menu("Sundae", "Dessert ","Ice_Cream", 5.00),
+		   new Menu("Spaghetti and Meatballs", "Dinner","Pasta", 5.00)
+   };
+   
+   private static final Hours[] INITIAL_HOURS = new Hours[] {
+		   new Hours("M-F","11:00 - 10:00"),
+		   new Hours("Su-Su", "12:00 - 12:00"),
+		   new Hours("T-Th", "5:00 - 2:00")
+   };
+private static final String FIND_BY_RATING = null;
+
+ private static void restaurantSearchMenu()
+   {
+	   int subMenuChoice = 0; 
+	   do {
+		   System.out.println("Please select from the following");
+		   System.out.println("1. View by rating");
+		   System.out.println("2. Display reviews");
+		   System.out.println("3. List Various Locations");
+		   System.out.println("4. Return to main menu");
+	   }while(subMenuChoice !=4);
+	   
+	   switch(subMenuChoice) {
+		case 1:	
+			viewByRating();
+			break;
+		case 2:
+			
+			break;
+		case 3:
+			
+			break;
+		case 4:
+			break;
+		default:
+			System.out.println("Choice must be a value between 1 and 4.");
+		
+	   }while(choice != 4);
+	   return;
+   }
+
+private static void viewByRating() {
+	Query q = manager.createQuery(): 
+	
+}
+
+ 
+  
+      /**
     * Create and persist a Student object to the database.
-    */
+    
    public void createStudentEntity() {
       LOGGER.fine("Creating Student object");
 
@@ -138,41 +313,9 @@ public class Homework4Application {
       LOGGER.fine("Persisting Student object to DB");
       this.entityManager.persist(graceHopper);
       
-      Restaurant mcDonalds = new Restaurant();
-      mcDonalds.setName("McDonalds");
-      mcDonalds.setStreet("123 Elm Street");
-      mcDonalds.setPhone("555-123-1234");
-      mcDonalds.setAvgRating(2.2);
-      mcDonalds.setDelivery(Restaurant.Delivery.YES);
-      mcDonalds.setPriceRange(Restaurant.PriceRange.$);
-      mcDonalds.setTakeout(Restaurant.Takeout.YES);
-      mcDonalds.setWebsite("mcD.com");
-      mcDonalds.setCity("Long Beach");
-      mcDonalds.setState(Restaurant.States.CA);
-      mcDonalds.setZipcode("90840");
-      mcDonalds.setCuisineCategory(Restaurant.CuisineCategory.Fast_Food);
-      this.entityManager.persist(mcDonalds);
 
-      Hours mcHours = new Hours();
-      mcHours.setRestaurant(mcDonalds);
-      mcHours.setDaysOpen("M");
-      mcHours.setHoursOpen("5AM-12PM");
-      this.entityManager.persist(mcHours);
-
-      Menu item1 = new Menu();
-      item1.setItemName("Mc Burger");
-      item1.setItemType(Menu.ItemType.Burger);
-      item1.setMenuType(Menu.MenuType.Lunch);
-      item1.setPrice(2.99);
-      item1.setRestaurant(mcDonalds);
-      this.entityManager.persist(item1);
-
-      Menu item2 = new Menu();
-      item2.setItemName("Mc Ice Cream");
-      item2.setItemType(Menu.ItemType.Ice_Cream);
-      item2.setPrice(1.50);
-      item2.setRestaurant(mcDonalds);
-      this.entityManager.persist(item2);
    }
-
+   */
+   
+   
 }

@@ -22,7 +22,11 @@ public class Hours {
         super();
     }
 
-    public String getDaysOpen() {
+    public Hours(String string, String string2) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public String getDaysOpen() {
         return daysOpen;
     }
 
